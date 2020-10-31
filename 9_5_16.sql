@@ -1,0 +1,47 @@
+--Proveedores que hayan vendido piezas blancas.
+
+SELECT CODPRO FROM VENTAS WHERE CODPIE IN (SELECT CODPIE FROM PIEZAS WHERE TIPO='Blanco');
+
+--Proveedor con la  cantidad mayor de pedido.
+
+select CODPRO from VENTAS WHERE CANTIDAD>=ALL(select CANTIDAD FROM VENTAS);
+
+--Pedidos que superen la cantidad media de unidades.
+
+select * FROM VENTAS WHERE CANTIDAD>ALL(select AVG(CANTIDAD) FROM VENTAS);
+
+--Proyectos que usan piezas de mas de dos gramos.
+
+SELECT * FROM VENTAS WHERE CODPIE IN (SELECT CODPIE FROM PIEZAS WHERE PESO>2);
+
+--Proveedores que hayan hecho alguna venta.
+
+select * from PROVEEDOR where  EXISTS(SELECT * FROM VENTAS WHERE VENTAS.CODPRO = PROVEEDOR.CODPRO );
+
+--Proveedores que NO hayan hecho alguna venta(de otra forma).
+
+SELECT * FROM PROVEEDOR WHERE CODPRO IN( (SELECT CODPRO FROM PROVEEDOR) MINUS (SELECT CODPRO FROM VENTAS) );
+
+
+
+select AVG(CANTIDAD) FROM VENTAS WHERE CODPRO='S1';
+
+--Para cada proveedor.(LO AGRUPA TODO SOLO)
+
+select CODPRO, AVG(CANTIDAD), MAX(CANTIDAD) FROM VENTAS GROUP BY CODPRO;
+
+
+
+SELECT TO_CHAR(FECHA,'yyyy'), AVG(CANTIDAD),SUM(CANTIDAD) FROM VENTAS GROUP BY TO_CHAR(FECHA,'yyyy');
+
+
+--El año en que se ha vendido mas
+
+SELECT TO_CHAR(FECHA,'yyyy'), AVG(CANTIDAD),SUM(CANTIDAD) FROM VENTAS GROUP BY TO_CHAR(FECHA,'yyyy') having sum(CANTIDAD)>=ALL(SELECT SUM(CANTIDAD) FROM VENTAS GROUP BY TO_CHAR(FECHA,'yyyy'));
+
+--Ventas totales de cada proveedor por año.
+
+select TO_CHAR(FECHA,'yyyy'),CODPRO,sum(cantidad) FROM VENTAS GROUP BY TO_CHAR(FECHA, 'yyyy'),CODPRO ORDER BY TO_CHAR(FECHA, 'yyyy'), CODPRO;
+
+
+SELECT P.CODPRO,suma,NOMPRO,CIUDAD FROM PROVEEDOR P,(SELECT CODPRO, SUM(CANTIDAD) suma FROM VENTAS GROUP BY CODPRO HAVING SUM(CANTIDAD)>200)TOTALES WHERE TOTALES.CODPRO = P.CODPRO;
